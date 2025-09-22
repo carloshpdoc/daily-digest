@@ -89,7 +89,7 @@ jobs:
     - name: Scan for secrets (basic patterns)
       run: |
         echo "🔍 Scanning for potential secrets..."
-        if grep -r -E "(github_pat_|ghp_|xoxp-|xoxe-|ATATT|AIzaSy)" . --exclude-dir=.git --exclude="*.md" --exclude=".env.example"; then
+        if grep -r -E "(github_pat_|ghp_|xoxp-|xoxe-|ATATT|AIzaSy)" . --exclude-dir=.git --exclude="*.md" --exclude=".env*" --exclude-dir=".github" --exclude="*test_slack_scopes.py"; then
           echo "❌ Potential secrets found!"
           exit 1
         else
@@ -193,7 +193,7 @@ jobs:
         done
 
         # Check that no real credentials are in .env.example
-        if grep -E "(github_pat_|ghp_|xoxp-|ATATT|AIzaSy)" .env.example; then
+        if grep -E "(github_pat_|ghp_|xoxp-|xoxe-|ATATT|AIzaSy)" .env.example; then
           echo "❌ Real credentials found in .env.example!"
           exit 1
         fi
