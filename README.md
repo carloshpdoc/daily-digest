@@ -10,7 +10,7 @@ The Daily Digest tool automatically generates reports containing:
 - **Jira Status**: Your current issues in progress and review, plus card movements
 - **Google Calendar**: Your meetings and events for the day
 
-## 🚀 Quick Start
+## 🚀 Installation
 
 ### 1. Install Dependencies
 
@@ -90,7 +90,7 @@ TIMEZONE=America/Sao_Paulo
 OUTPUT_FILE=/path/to/daily_report.txt
 ```
 
-## 🔧 Usage Examples
+## 🔧 Usage
 
 ### Basic Usage
 ```bash
