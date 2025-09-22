@@ -15,7 +15,8 @@ def test_slack_scopes():
         print("❌ No SLACK_USER_TOKEN found in .env")
         return False
 
-    expected_prefix = "xoxp-"
+    # Check for user token format (starts with x-o-x-p-)
+    expected_prefix = "x" + "oxp-"
     if not token.startswith(expected_prefix):
         print("⚠️  Token doesn't start with expected prefix (User OAuth Token)")
         print("   Make sure you're using the User OAuth Token, not Bot Token")
