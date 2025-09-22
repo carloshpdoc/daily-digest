@@ -120,10 +120,12 @@ Thumbs.db
 ehthumbs.db
 Desktop.ini
 
-# Test files
-test_*.py
+# Debug files (keep private)
 debug_*.py
 get_exact_statuses.py
+
+# Specific test files that should not be committed
+# (Add specific files here if needed)
 
 # Logs
 *.log
