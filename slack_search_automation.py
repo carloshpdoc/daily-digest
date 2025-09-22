@@ -2,8 +2,9 @@
 """Automated Slack Search for Huddle Detection"""
 
 import os
-import requests
 from datetime import datetime, timedelta
+
+import requests
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -15,7 +16,7 @@ def get_slack_token():
 
     if not token:
         try:
-            with open(".env", "r") as f:
+            with open(".env") as f:
                 for line in f:
                     if line.startswith("SLACK_USER_TOKEN="):
                         token = line.split("=", 1)[1].strip()

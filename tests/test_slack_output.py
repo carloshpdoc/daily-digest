@@ -52,9 +52,7 @@ if huddle_sessions:
             action_emoji = (
                 "🔗"
                 if session["action"] == "joined"
-                else "🔚"
-                if session["action"] == "ended"
-                else "💬"
+                else "🔚" if session["action"] == "ended" else "💬"
             )
             lines.append(
                 f"  - {session['time']} - {action_emoji} {session['action']} huddle"

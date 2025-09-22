@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Test Google Calendar integration directly"""
 
-import os
 import datetime as dt
+import os
 from zoneinfo import ZoneInfo
+
 import requests
 from dotenv import load_dotenv
 from icalendar import Calendar

@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Simple test of Jira without date filtering"""
 
-import os
 import base64
+import os
+
 import requests
 from dotenv import load_dotenv
 

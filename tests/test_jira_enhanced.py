@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Test the enhanced Jira functionality"""
 
-import os
 import datetime as dt
+import os
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -38,6 +39,7 @@ def test_jira_enhanced():
 def test_jira_status_values():
     """Test to see what status values are available in your Jira"""
     import base64
+
     import requests
 
     base_url = os.getenv("JIRA_BASE_URL")

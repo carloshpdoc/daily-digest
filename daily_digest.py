@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 daily_digest.py (patched)
 - Adiciona sanitização do ICS para corrigir "unsupported property: 02"
@@ -55,7 +54,7 @@ def _store_path():
 def _load_store():
     if os.path.exists(_store_path()):
         try:
-            with open(_store_path(), "r", encoding="utf-8") as f:
+            with open(_store_path(), encoding="utf-8") as f:
                 return json.load(f)
         except Exception:
             return {}
@@ -314,17 +313,21 @@ def slack_dm_huddles(START, END):
                     "time": event["time"].strftime("%H:%M"),
                     "date": event["time"].strftime("%Y-%m-%d"),
                     "text": event["text"],
-                    "action": "joined"
-                    if any(
-                        word in event["text"].lower()
-                        for word in ["joined", "iniciou", "started", "entrou"]
-                    )
-                    else "ended"
-                    if any(
-                        word in event["text"].lower()
-                        for word in ["ended", "left", "saiu"]
-                    )
-                    else "activity",
+                    "action": (
+                        "joined"
+                        if any(
+                            word in event["text"].lower()
+                            for word in ["joined", "iniciou", "started", "entrou"]
+                        )
+                        else (
+                            "ended"
+                            if any(
+                                word in event["text"].lower()
+                                for word in ["ended", "left", "saiu"]
+                            )
+                            else "activity"
+                        )
+                    ),
                 }
                 huddle_sessions.append(session_info)
 
@@ -374,7 +377,6 @@ def _sanitize_ics(raw: bytes) -> bytes:
 def github_prs(start_date, end_date):
     token = env_required("GITHUB_TOKEN")
     repos = os.getenv("GITHUB_REPOS", "").split(",")
-    user = os.getenv("GITHUB_USER")
 
     if not token:
         return []
@@ -469,7 +471,6 @@ def jira_enhanced_status(target_date):
 
         if response.status_code == 200:
             data = response.json()
-            total_issues = len(data.get("issues", []))
             matched_issues = 0
 
             for issue in data.get("issues", []):

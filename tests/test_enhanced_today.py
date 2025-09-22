@@ -2,6 +2,7 @@
 """Test enhanced Jira functionality with current date"""
 
 import datetime as dt
+
 from daily_digest import jira_enhanced_status
 
 # Test with current date

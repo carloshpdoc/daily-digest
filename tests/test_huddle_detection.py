@@ -2,8 +2,8 @@
 """Test enhanced huddle detection with simulated Slack data"""
 
 import datetime as dt
-from zoneinfo import ZoneInfo
 import re
+from zoneinfo import ZoneInfo
 
 
 # Simulated Slack message data that would represent a huddle with Yago Castro on Sept 19th
@@ -91,18 +91,22 @@ def test_huddle_detection():
                     word in msg_text.lower()
                     for word in ["joined", "iniciou", "started", "entrou"]
                 )
-                else "ended"
-                if any(word in msg_text.lower() for word in ["ended", "left", "saiu"])
-                else "activity"
+                else (
+                    "ended"
+                    if any(
+                        word in msg_text.lower() for word in ["ended", "left", "saiu"]
+                    )
+                    else "activity"
+                )
             )
 
             huddle_events.append(
                 {
                     "time": msg_time,
                     "text": msg_text,
-                    "participant": "teammate"
-                    if "Yago" in msg_text
-                    else "carlos.henrique",
+                    "participant": (
+                        "teammate" if "Yago" in msg_text else "carlos.henrique"
+                    ),
                     "action": action,
                     "timestamp": msg_ts,
                 }
@@ -128,9 +132,7 @@ def test_huddle_detection():
             action_emoji = (
                 "🔗"
                 if event["action"] == "joined"
-                else "🔚"
-                if event["action"] == "ended"
-                else "💬"
+                else "🔚" if event["action"] == "ended" else "💬"
             )
             print(
                 f"  - {event['time'].strftime('%H:%M')} - {action_emoji} {event['action']} huddle"

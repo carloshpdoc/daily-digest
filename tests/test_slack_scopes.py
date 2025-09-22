@@ -2,6 +2,7 @@
 """Test Slack token scopes"""
 
 import os
+
 import requests
 from dotenv import load_dotenv
 
@@ -14,8 +15,9 @@ def test_slack_scopes():
         print("❌ No SLACK_USER_TOKEN found in .env")
         return False
 
-    if not token.startswith("xoxp-"):
-        print("⚠️  Token doesn't start with 'xoxp-' (User OAuth Token)")
+    expected_prefix = "xoxp-"
+    if not token.startswith(expected_prefix):
+        print("⚠️  Token doesn't start with expected prefix (User OAuth Token)")
         print("   Make sure you're using the User OAuth Token, not Bot Token")
 
     headers = {"Authorization": f"Bearer {token}"}

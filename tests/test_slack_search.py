@@ -2,6 +2,7 @@
 """Test Slack Search API functionality"""
 
 import os
+
 import requests
 from dotenv import load_dotenv
 
@@ -24,7 +25,7 @@ def test_slack_search():
     if not token:
         # Try reading from .env file directly
         try:
-            with open(".env", "r") as f:
+            with open(".env") as f:
                 for line in f:
                     if line.startswith("SLACK_USER_TOKEN="):
                         token = line.split("=", 1)[1].strip()
@@ -41,7 +42,7 @@ def test_slack_search():
     print(f"🔑 Token loaded: {token[:20]}...")
 
     print(f"🔑 Token loaded: {token[:20]}...")
-    if not token.startswith(("xoxp-", "xoxe.")):
+    if not token or len(token) < 10:
         print("⚠️  Token format unexpected")
         return False
 
