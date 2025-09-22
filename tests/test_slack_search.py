@@ -51,7 +51,7 @@ def test_slack_search():
     print("=" * 50)
 
     # Test search.messages endpoint with huddle query
-    search_query = "huddle from:@yago.castro on:2025-09-19"
+    search_query = "huddle from:@teammate on:2025-09-19"
     url = "https://slack.com/api/search.messages"
 
     params = {"query": search_query, "count": 10, "highlight": True}
@@ -118,8 +118,8 @@ def test_alternative_searches():
         "huddle",
         "joined the huddle",
         "started a huddle",
-        "from:@yago.castro",
-        "in:@carlosh.carmo",  # DM with you
+        "from:@teammate",
+        "in:@your.username",  # DM with you
         "after:2025-09-19 before:2025-09-20",
     ]
 

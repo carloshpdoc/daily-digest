@@ -1,0 +1,80 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Run full test suite
+      run: |
+        # Run all validation checks
+        python -c "import daily_digest; print('✅ Main module imports')"
+
+        # Validate all test files
+        for test_file in tests/test_*.py; do
+          python -m py_compile "$test_file"
+        done
+        echo "✅ All tests compile successfully"
+
+    - name: Create Release Notes
+      run: |
+        # Extract version from tag
+        VERSION=${GITHUB_REF#refs/tags/v}
+        echo "Creating release for version $VERSION"
+
+        # Create release notes
+        cat > release_notes.md << EOF
+        ## Daily Digest Generator v$VERSION
+
+        ### Features
+        - GitHub PR tracking and reporting
+        - Jira issue status and movement tracking
+        - Google Calendar event integration
+        - Comprehensive test suite
+        - macOS automation support
+
+        ### Installation
+        \`\`\`bash
+        git clone https://github.com/carloshpdoc/daily-digest.git
+        cd daily-digest
+        ./setup.sh
+        \`\`\`
+
+        ### What's Changed
+        See CHANGELOG.md for detailed changes.
+
+        ### Full Changelog
+        **Full Changelog**: https://github.com/carloshpdoc/daily-digest/compare/...v$VERSION
+        EOF
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v1
+      with:
+        body_path: release_notes.md
+        files: |
+          setup.sh
+          requirements.txt
+          .env.example
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

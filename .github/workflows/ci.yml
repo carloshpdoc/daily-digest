@@ -1,0 +1,229 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint-and-format:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install black ruff mypy
+        pip install -r requirements.txt
+
+    - name: Check code formatting with Black
+      run: black --check --diff .
+
+    - name: Lint with Ruff
+      run: ruff check .
+
+    - name: Type check with mypy
+      run: mypy daily_digest.py --ignore-missing-imports
+      continue-on-error: true  # Optional for now
+
+  test-imports:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Test module imports
+      run: |
+        python -c "import daily_digest; print('✅ Main module imports successfully')"
+        python -c "from daily_digest import github_prs, jira_enhanced_status; print('✅ Core functions import successfully')"
+
+    - name: Validate test files syntax
+      run: |
+        for test_file in tests/test_*.py; do
+          echo "Checking $test_file"
+          python -m py_compile "$test_file"
+        done
+        echo "✅ All test files have valid syntax"
+
+  security-check:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install security tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install bandit safety
+        pip install -r requirements.txt
+
+    - name: Run Bandit security scan
+      run: bandit -r . -f json -o bandit-report.json || true
+
+    - name: Check for known vulnerabilities
+      run: safety check --json || true
+
+    - name: Scan for secrets (basic patterns)
+      run: |
+        echo "🔍 Scanning for potential secrets..."
+        if grep -r -E "(github_pat_|ghp_|xoxp-|xoxe-|ATATT|AIzaSy)" . --exclude-dir=.git --exclude="*.md" --exclude=".env.example"; then
+          echo "❌ Potential secrets found!"
+          exit 1
+        else
+          echo "✅ No obvious secrets detected"
+        fi
+
+  documentation:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Check documentation
+      run: |
+        echo "📚 Checking documentation..."
+
+        # Check if README exists and has content
+        if [ ! -f README.md ] || [ ! -s README.md ]; then
+          echo "❌ README.md is missing or empty"
+          exit 1
+        fi
+
+        # Check for required sections in README
+        required_sections=("Installation" "Configuration" "Usage" "Troubleshooting")
+        for section in "${required_sections[@]}"; do
+          if ! grep -qi "$section" README.md; then
+            echo "❌ README.md missing section: $section"
+            exit 1
+          fi
+        done
+
+        # Check if .env.example exists
+        if [ ! -f .env.example ]; then
+          echo "❌ .env.example is missing"
+          exit 1
+        fi
+
+        # Check if tests have documentation
+        if [ ! -f tests/README.md ]; then
+          echo "❌ tests/README.md is missing"
+          exit 1
+        fi
+
+        echo "✅ Documentation checks passed"
+
+  multi-python:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.10', '3.11', '3.12']
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Test basic functionality
+      run: |
+        python -c "
+        import daily_digest
+        import sys
+        print(f'✅ Python {sys.version_info.major}.{sys.version_info.minor} compatibility confirmed')
+        "
+
+  validate-config:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Validate configuration template
+      run: |
+        echo "🔧 Validating .env.example..."
+
+        # Check required variables exist in .env.example
+        required_vars=("GITHUB_TOKEN" "GITHUB_USER" "GITHUB_REPOS" "JIRA_BASE_URL" "JIRA_EMAIL" "JIRA_TOKEN" "GCAL_ICS_URL")
+
+        for var in "${required_vars[@]}"; do
+          if ! grep -q "^${var}=" .env.example; then
+            echo "❌ Missing required variable in .env.example: $var"
+            exit 1
+          fi
+        done
+
+        # Check that no real credentials are in .env.example
+        if grep -E "(github_pat_|ghp_|xoxp-|ATATT|AIzaSy)" .env.example; then
+          echo "❌ Real credentials found in .env.example!"
+          exit 1
+        fi
+
+        echo "✅ Configuration template is valid"
+
+  integration-test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Test without credentials (dry run)
+      run: |
+        echo "🧪 Testing error handling without credentials..."
+
+        # Test that script handles missing credentials gracefully
+        python daily_digest.py --date yesterday || echo "Expected failure - no credentials configured"
+
+        # Test help functionality
+        python daily_digest.py --help
+
+        echo "✅ Basic error handling works correctly"

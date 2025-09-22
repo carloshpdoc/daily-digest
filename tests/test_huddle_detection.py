@@ -100,7 +100,7 @@ def test_huddle_detection():
                 {
                     "time": msg_time,
                     "text": msg_text,
-                    "participant": "yago.castro"
+                    "participant": "teammate"
                     if "Yago" in msg_text
                     else "carlos.henrique",
                     "action": action,
