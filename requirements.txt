@@ -1,0 +1,4 @@
+requests
+python-dotenv
+icalendar
+python-dateutil
